@@ -6,10 +6,6 @@
 #include <libfastsim/fastsim.hpp>
 #include <pybind11/stl.h> // Automatic conversion of std::vector
 
-int add(int i, int j) {
-	return i + j;
-}
-
 namespace py = pybind11;
 
 PYBIND11_MODULE(pyfastsim, m) {
@@ -131,17 +127,7 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("get_x_pixel", &fastsim::Laser::get_x_pixel)
 		.def("get_y_pixel", &fastsim::Laser::get_y_pixel);
 
-	m.def("add", &add, R"pbdoc(
-		Add two numbers
 
-		Some other explanation about the add function.
-	)pbdoc");
-
-	m.def("subtract", [](int i, int j) { return i - j; }, R"pbdoc(
-		Subtract two numbers
-
-		Some other explanation about the subtract function.
-	)pbdoc");
 
 #ifdef VERSION_INFO
 	m.attr("__version__") = VERSION_INFO;

@@ -1,6 +1,6 @@
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-import sys
+import sys, os
 import setuptools
 
 __version__ = '0.0.1'
@@ -66,6 +66,13 @@ def cpp_flag(compiler):
                            'is needed!')
 
 
+def get_SDL():
+    if(os.system("sdl-config --cflags") == 0):
+        return True
+    else:
+        return False
+
+
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
@@ -79,6 +86,7 @@ class BuildExt(build_ext):
     def build_extensions(self):
         ct = self.compiler.compiler_type
         opts = self.c_opts.get(ct, [])
+        extra_libs = []
         if ct == 'unix':
             opts.append('-DVERSION_INFO="%s"' % self.distribution.get_version())
             opts.append(cpp_flag(self.compiler))
@@ -86,8 +94,13 @@ class BuildExt(build_ext):
                 opts.append('-fvisibility=hidden')
         elif ct == 'msvc':
             opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
+# Disabled -- SDL does not work now
+#        if(get_SDL()):
+#            opts.append("-DUSE_SDL")
+#            extra_libs.append("SDL")
         for ext in self.extensions:
             ext.extra_compile_args = opts
+            ext.libraries += extra_libs
         build_ext.build_extensions(self)
 
 setup(

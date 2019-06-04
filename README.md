@@ -5,6 +5,8 @@ Python bindings for [libfastsim](https://github.com/jbmouret/libfastsim).
 
 Installation
 ------------
+- Use a c++14 compatible compiler
+- libfastsim must be compiled with -fPIC !
 
 TODO
 

@@ -78,11 +78,11 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("get_y", &fastsim::IlluminatedSwitch::get_y)
 		.def("set_pos", &fastsim::IlluminatedSwitch::set_pos)
 		.def("get_activated", &fastsim::IlluminatedSwitch::get_activated)
-		.def("link", &fastsim::IlluminatedSwitch::link); // not working - TODO handle boost::shared_ptr
+		.def("link", &fastsim::IlluminatedSwitch::link);
 	// ClosestSwitch_f not implemented
 	
 	// map.hpp
-	py::class_<fastsim::Map> map(m, "Map");
+	py::class_<fastsim::Map, std::shared_ptr<fastsim::Map>> map(m, "Map");
 	map.def(py::init<const char*, float>(), py::arg("fname"), py::arg("real_w"))
 		.def(py::init<const fastsim::Map&>())
 		.def("get_pixel", &fastsim::Map::get_pixel)
@@ -99,9 +99,9 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("check_inter_is", &fastsim::Map::check_inter_is)
 		.def("get_goals", &fastsim::Map::get_goals)
 		.def("add_goal", &fastsim::Map::add_goal)
-		.def("add_illuminated_switch", &fastsim::Map::add_illuminated_switch) // not working - TODO handle boost::shared_ptr
-		.def("get_illuminated_switches", &fastsim::Map::get_illuminated_switches) // not working - TODO handle boost::shared_ptr
-		.def("get_illuminated_switch_by_color", &fastsim::Map::get_illuminated_switch_by_color) // not working - TODO handle boost::shared_ptr
+		.def("add_illuminated_switch", &fastsim::Map::add_illuminated_switch)
+		.def("get_illuminated_switches", &fastsim::Map::get_illuminated_switches)
+		.def("get_illuminated_switch_by_color", &fastsim::Map::get_illuminated_switch_by_color)
 		.def("clear_illuminated_switches", &fastsim::Map::clear_illuminated_switches)
 		.def("update", &fastsim::Map::update)
 		.def("terrain_switch", &fastsim::Map::terrain_switch)

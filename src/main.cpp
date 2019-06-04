@@ -156,7 +156,7 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def(py::init<float>(), py::arg("radius"))
 		.def(py::init<float, const fastsim::Posture&>(), py::arg("radius"), py::arg("pos"))
 		.def("reinit", &fastsim::Robot::reinit)
-		.def("move", &fastsim::Robot::move)
+		.def("move", &fastsim::Robot::move, py::arg("v1"), py::arg("v2"), py::arg("m"), py::arg("sticky_walls")=true)
 		.def("get_pos", &fastsim::Robot::get_pos)
 		.def("set_pos", &fastsim::Robot::set_pos)
 		.def("get_vx", &fastsim::Robot::get_vx)

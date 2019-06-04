@@ -182,8 +182,25 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("use_camera", py::overload_cast<>(&fastsim::Robot::use_camera, py::const_));
 
 	// display.hpp
-	/*py::class_<fastsim::Display>(m, "Display")
-		.def(py::init<float>(), py::arg("radius"))*/
+	py::class_<fastsim::Display>(m, "Display")
+		.def(py::init<std::shared_ptr<fastsim::Map>, const fastsim::Robot&>())
+		.def("update", &fastsim::Display::update)
+		.def("update_map", &fastsim::Display::update_map);
+
+
+	// radar.hpp
+	py::class_<fastsim::Radar>(m, "Radar")
+		.def(py::init<int,int,bool>(), py::arg("color"), py::arg("nb_slices"), py::arg("through_walls")=true)
+		.def("update", &fastsim::Radar::update)
+		.def("get_activated_slice", &fastsim::Radar::get_activated_slice)
+		.def("get_nb_slices", &fastsim::Radar::get_nb_slices)
+		.def("get_color", &fastsim::Radar::get_color)
+		.def("get_inc", &fastsim::Radar::get_inc);
+	
+	// settings.hpp
+	
+	
+	// light_sensor.hpp
 
 #ifdef VERSION_INFO
 	m.attr("__version__") = VERSION_INFO;

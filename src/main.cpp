@@ -198,9 +198,23 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("get_inc", &fastsim::Radar::get_inc);
 	
 	// settings.hpp
-	
-	
+	py::class_<fastsim::Settings>(m, "Settings")
+		.def(py::init<const std::string&>(), py::arg("xml_file"))
+		.def("map", &fastsim::Settings::map)
+		.def("robot", &fastsim::Settings::robot)
+		.def("display", &fastsim::Settings::display);
+
 	// light_sensor.hpp
+	py::class_<fastsim::LightSensor>(m, "LightSensor")
+		.def(py::init<int,float,float>(), py::arg("color"), py::arg("angle"), py::arg("range"))
+		.def("update", &fastsim::LightSensor::update)
+		.def("get_color", &fastsim::LightSensor::get_color)
+		.def("get_angle", &fastsim::LightSensor::get_angle)
+		.def("get_range", &fastsim::LightSensor::get_range)
+		.def("get_activated", &fastsim::LightSensor::get_activated)
+		.def("get_num", &fastsim::LightSensor::get_num)
+		.def("get_distance", &fastsim::LightSensor::get_distance);
+
 
 #ifdef VERSION_INFO
 	m.attr("__version__") = VERSION_INFO;

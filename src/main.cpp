@@ -127,6 +127,15 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("get_x_pixel", &fastsim::Laser::get_x_pixel)
 		.def("get_y_pixel", &fastsim::Laser::get_y_pixel);
 
+	// laser_scanner.hpp
+	py::class_<fastsim::LaserScanner>(m, "LaserScanner")
+		.def(py::init<float, float, float, float>(), py::arg("angle_min"), py::arg("angle_max"), py::arg("angle_increment"), py::arg("range_max"))
+		.def("update", &fastsim::LaserScanner::update)
+		.def("get_range_max", &fastsim::LaserScanner::get_range_max)
+		.def("get_angle_max", &fastsim::LaserScanner::get_angle_max)
+		.def("get_angle_min", &fastsim::LaserScanner::get_angle_min)
+		.def("get_angle_increment", &fastsim::LaserScanner::get_angle_increment)
+		.def("get_lasers", &fastsim::LaserScanner::get_lasers);
 
 
 #ifdef VERSION_INFO

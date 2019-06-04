@@ -137,6 +137,49 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("get_angle_increment", &fastsim::LaserScanner::get_angle_increment)
 		.def("get_lasers", &fastsim::LaserScanner::get_lasers);
 
+	//linear_camera.hpp
+	py::class_<fastsim::LinearCamera>(m, "LinearCamera")
+		.def(py::init<>())
+		.def(py::init<float,int>(), py::arg("angular_range"), py::arg("nb_pixels"))
+		.def("update", &fastsim::LinearCamera::update)
+		.def("pixels", &fastsim::LinearCamera::pixels)
+		.def("get_angular_range", &fastsim::LinearCamera::get_angular_range);
+
+	// robot.hpp
+	py::class_<fastsim::Robot::BoundingBox>(m, "BoundingBox")
+		.def_readwrite("x", &fastsim::Robot::BoundingBox::x)
+		.def_readwrite("y", &fastsim::Robot::BoundingBox::y)
+		.def_readwrite("w", &fastsim::Robot::BoundingBox::w)
+		.def_readwrite("h", &fastsim::Robot::BoundingBox::h);
+	
+	py::class_<fastsim::Robot>(m, "Robot")
+		.def(py::init<float>(), py::arg("radius"))
+		.def(py::init<float, const fastsim::Posture&>(), py::arg("radius"), py::arg("pos"))
+		.def("reinit", &fastsim::Robot::reinit)
+		.def("move", &fastsim::Robot::move)
+		.def("get_pos", &fastsim::Robot::get_pos)
+		.def("set_pos", &fastsim::Robot::set_pos)
+		.def("get_vx", &fastsim::Robot::get_vx)
+		.def("get_vy", &fastsim::Robot::get_vy)
+		.def("get_va", &fastsim::Robot::get_va)
+		.def("get_bb", &fastsim::Robot::get_bb)
+		.def("get_radius", &fastsim::Robot::get_radius)
+		.def("get_collision", &fastsim::Robot::get_collision)
+		.def("get_left_bumper", &fastsim::Robot::get_left_bumper)
+		.def("get_right_bumper", &fastsim::Robot::get_right_bumper)
+		.def("add_laser", &fastsim::Robot::add_laser)
+		.def("get_lasers", &fastsim::Robot::get_lasers)
+		.def("add_laser_scanner", &fastsim::Robot::add_laser_scanner)
+		.def("get_laser_scanners", &fastsim::Robot::get_laser_scanners)
+		.def("add_radar", &fastsim::Robot::add_radar)
+		.def("get_radars", &fastsim::Robot::get_radars)
+		.def("add_light_sensor", &fastsim::Robot::add_light_sensor)
+		.def("get_light_sensors", &fastsim::Robot::get_light_sensors)
+		.def("set_color", &fastsim::Robot::set_color)
+		.def("use_camera", py::overload_cast<>(&fastsim::Robot::use_camera))
+		.def("use_camera", py::overload_cast<const fastsim::LinearCamera&>(&fastsim::Robot::use_camera))
+		.def("get_camera", &fastsim::Robot::get_camera)
+		.def("use_camera", py::overload_cast<>(&fastsim::Robot::use_camera, py::const_));
 
 #ifdef VERSION_INFO
 	m.attr("__version__") = VERSION_INFO;

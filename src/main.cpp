@@ -63,7 +63,7 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("get_color", &fastsim::Goal::get_color);
 	
 	// illuminated_switch.hpp
-	py::class_<fastsim::IlluminatedSwitch>(m, "IlluminatedSwitch")
+	py::class_<fastsim::IlluminatedSwitch, std::shared_ptr<fastsim::IlluminatedSwitch>>(m, "IlluminatedSwitch")
 		.def(py::init<int, float, float, float, bool>())
 		.def("try_to_activate", &fastsim::IlluminatedSwitch::try_to_activate)
 		.def("activate", &fastsim::IlluminatedSwitch::activate)
@@ -180,6 +180,10 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("use_camera", py::overload_cast<const fastsim::LinearCamera&>(&fastsim::Robot::use_camera))
 		.def("get_camera", &fastsim::Robot::get_camera)
 		.def("use_camera", py::overload_cast<>(&fastsim::Robot::use_camera, py::const_));
+
+	// display.hpp
+	/*py::class_<fastsim::Display>(m, "Display")
+		.def(py::init<float>(), py::arg("radius"))*/
 
 #ifdef VERSION_INFO
 	m.attr("__version__") = VERSION_INFO;

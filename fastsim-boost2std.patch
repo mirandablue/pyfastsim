@@ -1,0 +1,400 @@
+diff --git a/src/display.cpp b/src/display.cpp
+index 9a2573a..dac6eac 100644
+--- a/src/display.cpp
++++ b/src/display.cpp
+@@ -56,7 +56,7 @@ namespace fastsim
+     SDL_UpdateRect(_screen, 0, 0, _w, _h);
+   }
+ 
+-  Display :: Display(const boost::shared_ptr<Map>& m, const Robot& r) : 
++  Display :: Display(const std::shared_ptr<Map>& m, const Robot& r) : 
+     _map(m), _robot(r)
+   {
+     _w = _map->get_pixel_w();
+diff --git a/src/display.hpp b/src/display.hpp
+index bf8ddfd..a1cce50 100644
+--- a/src/display.hpp
++++ b/src/display.hpp
+@@ -37,7 +37,7 @@
+ 
+ #include "map.hpp"
+ #include "robot.hpp"
+-#include <boost/shared_ptr.hpp>
++#include <memory>
+ 
+ namespace fastsim
+ {
+@@ -46,7 +46,7 @@ namespace fastsim
+ 
+   public:
+ #ifdef USE_SDL
+-    Display(const boost::shared_ptr<Map>& m, const Robot& r);
++    Display(const std::shared_ptr<Map>& m, const Robot& r);
+     ~Display()
+     {
+       SDL_FreeSurface(_map_bmp);
+@@ -59,13 +59,13 @@ namespace fastsim
+       _blit_map();
+     }
+ #else
+-    Display(const boost::shared_ptr<Map>& m, const Robot& r) : _map(m), _robot(r) {}
++    Display(const std::shared_ptr<Map>& m, const Robot& r) : _map(m), _robot(r) {}
+     ~Display() {}
+     void update(){}
+     void update_map(){}
+ #endif
+   protected:
+-    const boost::shared_ptr<Map>& _map;
++    const std::shared_ptr<Map>& _map;
+     const Robot& _robot;
+ #ifdef USE_SDL
+     void _events();
+diff --git a/src/illuminated_switch.hpp b/src/illuminated_switch.hpp
+index c53bb00..e6c7913 100644
+--- a/src/illuminated_switch.hpp
++++ b/src/illuminated_switch.hpp
+@@ -47,21 +47,21 @@ namespace fastsim
+       float get_y() const { return _y; }
+       void set_pos(float x, float y) { _x = x; _y = y; }
+       bool get_activated() const { return _activated; }
+-      void link(boost::shared_ptr<IlluminatedSwitch> o) { _linked_lights.push_back(o); }
++      void link(std::shared_ptr<IlluminatedSwitch> o) { _linked_lights.push_back(o); }
+     protected:
+       int _color;
+       float _radius;
+       float _x, _y;
+       bool _on;
+       bool _activated;
+-      std::vector<boost::shared_ptr<IlluminatedSwitch> > _linked_lights;
++      std::vector<std::shared_ptr<IlluminatedSwitch> > _linked_lights;
+   };
+ 
+   struct ClosestSwitch_f
+   {
+     ClosestSwitch_f(float x, float y) : _x(x), _y(y) {}
+-    bool operator()(const boost::shared_ptr<IlluminatedSwitch> i1,
+-		    const boost::shared_ptr<IlluminatedSwitch> i2)
++    bool operator()(const std::shared_ptr<IlluminatedSwitch> i1,
++		    const std::shared_ptr<IlluminatedSwitch> i2)
+     {
+       float x1 = i1->get_x() - _x;
+       float y1 = i1->get_y() - _y;
+diff --git a/src/laser.cpp b/src/laser.cpp
+index a6e41ea..301b375 100644
+--- a/src/laser.cpp
++++ b/src/laser.cpp
+@@ -26,7 +26,7 @@
+ namespace fastsim
+ {
+   float Laser :: update(const Posture& pos,
+-			const boost::shared_ptr<Map>& m)
++			const std::shared_ptr<Map>& m)
+   {
+     float x2 = cosf(_angle + pos.theta()) * _range + pos.x() + _gap_dist * cosf(_gap_angle + pos.theta());
+     float y2 = sinf(_angle + pos.theta()) * _range + pos.y() + _gap_dist * sinf(_gap_angle + pos.theta());
+diff --git a/src/laser.hpp b/src/laser.hpp
+index 91115b5..c8078ac 100644
+--- a/src/laser.hpp
++++ b/src/laser.hpp
+@@ -24,7 +24,7 @@
+ # define   	LASER_HH_
+ #include "map.hpp"
+ #include "posture.hpp"
+-#include <boost/shared_ptr.hpp>
++#include <memory>
+ 
+ namespace fastsim
+ {
+@@ -38,7 +38,7 @@ namespace fastsim
+       _x_pixel(0), _y_pixel(0),
+       _dist(-1) {}
+     float update(const Posture& pos,
+-		 const boost::shared_ptr<Map>& map);
++		 const std::shared_ptr<Map>& map);
+     float get_dist() const { return _dist; }
+     float get_angle() const { return _angle; }
+     float get_range() const { return _range; }
+@@ -58,8 +58,8 @@ namespace fastsim
+     int _x_pixel, _y_pixel;
+     float _dist;
+     // 
+-    bool _try_pixel(const boost::shared_ptr<Map>& m, int x, int y);
+-    bool _line_inter(const boost::shared_ptr<Map>& m,
++    bool _try_pixel(const std::shared_ptr<Map>& m, int x, int y);
++    bool _line_inter(const std::shared_ptr<Map>& m,
+ 		     int y1, int x1, // src
+ 		     int y2, int x2, // dest
+ 		     int& x_res, int& y_res //res
+diff --git a/src/laser_scanner.hpp b/src/laser_scanner.hpp
+index f5f4098..5e9dd32 100644
+--- a/src/laser_scanner.hpp
++++ b/src/laser_scanner.hpp
+@@ -41,7 +41,7 @@ namespace fastsim
+ 	_lasers.push_back(Laser(a, range_max));
+     }
+     void update(const Posture& pos,
+-		 const boost::shared_ptr<Map>& map){
++		 const std::shared_ptr<Map>& map){
+       for (size_t i = 0; i < _lasers.size(); ++i)
+ 	_lasers[i].update(pos, map);
+     }    
+diff --git a/src/light_sensor.cpp b/src/light_sensor.cpp
+index 4d5d43a..a0c2def 100644
+--- a/src/light_sensor.cpp
++++ b/src/light_sensor.cpp
+@@ -5,7 +5,7 @@
+ namespace fastsim
+ {
+   int LightSensor :: update(const Posture& pos,
+-			    const boost::shared_ptr<Map>& map)
++			    const std::shared_ptr<Map>& map)
+   {
+     const std::vector<Map::ill_sw_t>& isv = map->get_illuminated_switches();
+     _activated = false;
+diff --git a/src/light_sensor.hpp b/src/light_sensor.hpp
+index f99bac8..3e5284b 100644
+--- a/src/light_sensor.hpp
++++ b/src/light_sensor.hpp
+@@ -1,7 +1,7 @@
+ #ifndef FASTSIM_LIGHT_SENSOR_HPP_
+ #define FASTSIM_LIGHT_SENSOR_HPP_
+ 
+-#include <boost/shared_ptr.hpp>
++#include <memory>
+ #include "posture.hpp"
+ #include "map.hpp"
+ 
+@@ -20,7 +20,7 @@ namespace fastsim
+       //      std::cout<<"angle="<<angle<<" range="<<range<<std::endl;
+     }
+     int update(const Posture& pos,
+-	       const boost::shared_ptr<Map>& map);
++	       const std::shared_ptr<Map>& map);
+     int	get_color() const { return _color; }
+     float get_angle() const { return _angle; }
+     float get_range() const { return _range; }
+diff --git a/src/linear_camera.cpp b/src/linear_camera.cpp
+index d1dbf4d..a5c45ec 100644
+--- a/src/linear_camera.cpp
++++ b/src/linear_camera.cpp
+@@ -6,7 +6,7 @@ namespace fastsim
+ {
+   
+   void LinearCamera :: update(const Posture& pos,
+-                             const boost::shared_ptr<Map>& map)
++                             const std::shared_ptr<Map>& map)
+   {
+     float inc = _angular_range / _pixels.size();
+     float r = -_angular_range / 2.0f;
+diff --git a/src/linear_camera.hpp b/src/linear_camera.hpp
+index f98bad7..4df9679 100644
+--- a/src/linear_camera.hpp
++++ b/src/linear_camera.hpp
+@@ -1,7 +1,7 @@
+ #ifndef FASTSIM_LINEAR_CAMERA_HPP_
+ #define FASTSIM_LINEAR_CAMERA_HPP_
+ 
+-#include <boost/shared_ptr.hpp>
++#include <memory>
+ #include "posture.hpp"
+ #include "map.hpp"
+ 
+@@ -17,7 +17,7 @@ namespace fastsim
+     { std::fill(_pixels.begin(), _pixels.end(), -1); }
+    
+     void update(const Posture& pos,
+-	       const boost::shared_ptr<Map>& map);
++	       const std::shared_ptr<Map>& map);
+     const std::vector<int>& pixels() const { return _pixels; }
+     float get_angular_range() const { return _angular_range; }
+   protected:
+diff --git a/src/main.cpp b/src/main.cpp
+index ecac08c..63e7ee0 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -26,13 +26,14 @@ int main(int argc, char* argv[]) {
+     exit(1);
+   }
+   fastsim::Settings settings(argv[1]);
+-  boost::shared_ptr<Map> map = settings.map();
+-  boost::shared_ptr<Robot> robot = settings.robot();
++  std::shared_ptr<Map> map = settings.map();
++  std::shared_ptr<Robot> robot = settings.robot();
+ 
+   Display d(map, *robot);
+   
+   for (int i = 0; i < 10000; ++i)
+     {
++      std::cout << "Step " << i << " robot pos: x = "<< robot->get_pos().x() <<"    y = "<< robot->get_pos().y() <<"    theta = "<< robot->get_pos().theta() << std::endl;
+       d.update();
+       robot->move(1.0, 1.1, map);
+       usleep(1000);
+@@ -46,8 +47,8 @@ int main()
+   try
+     {
+       using namespace fastsim; 
+-      boost::shared_ptr<Map> m = 
+-	boost::shared_ptr<Map>(new Map("cuisine.pbm", 600));
++      std::shared_ptr<Map> m = 
++	std::shared_ptr<Map>(new Map("cuisine.pbm", 600));
+       m->add_goal(Goal(100, 100, 10, 0));
+       Robot r(20.0f, Posture(200, 200, 0));
+       r.add_laser(Laser(M_PI / 4.0, 100.0f));
+diff --git a/src/map.hpp b/src/map.hpp
+index 36b52f6..0e6cca8 100644
+--- a/src/map.hpp
++++ b/src/map.hpp
+@@ -27,7 +27,8 @@
+ #include <fstream>
+ #include <cmath>
+ #include <cassert>
+-#include <boost/shared_ptr.hpp>
++#include <memory>
++#include <algorithm>
+ #include <iostream>
+ 
+ #include "misc.hpp"
+@@ -121,7 +122,7 @@ namespace fastsim
+     const std::vector<Goal>& get_goals() const { return _goals; }
+     void add_goal(const Goal& g) { _goals.push_back(g); }
+ 
+-    typedef boost::shared_ptr<IlluminatedSwitch> ill_sw_t;
++    typedef std::shared_ptr<IlluminatedSwitch> ill_sw_t;
+     void add_illuminated_switch(ill_sw_t is) 
+     { _illuminated_switches.push_back(is); }
+     const std::vector<ill_sw_t>& get_illuminated_switches() const 
+diff --git a/src/radar.cpp b/src/radar.cpp
+index a72e4de..e9ac28a 100644
+--- a/src/radar.cpp
++++ b/src/radar.cpp
+@@ -5,7 +5,7 @@
+ namespace fastsim
+ {
+   int Radar :: update(const Posture& pos,
+-		      const boost::shared_ptr<Map>& map)
++		      const std::shared_ptr<Map>& map)
+   {
+     const Goal& g = map->get_goals()[_color];
+     float angle = normalize_angle_2pi(atan2(g.get_y() - pos.y(), g.get_x() - pos.x())
+diff --git a/src/radar.hpp b/src/radar.hpp
+index d421826..5142448 100644
+--- a/src/radar.hpp
++++ b/src/radar.hpp
+@@ -1,7 +1,7 @@
+ #ifndef FASTSIM_RADAR_HPP_
+ #define FASTSIM_RADAR_HPP_
+ 
+-#include <boost/shared_ptr.hpp>
++#include <memory>
+ #include "posture.hpp"
+ #include "map.hpp"
+ 
+@@ -18,7 +18,7 @@ namespace fastsim
+       _through_walls(through_walls)
+     {}
+     int update(const Posture& pos,
+-	       const boost::shared_ptr<Map>& map);
++	       const std::shared_ptr<Map>& map);
+     int get_activated_slice() const { return _activated_slice; }
+     int get_nb_slices() const { return _nb_slices; }
+     int get_color() const { return _color; }
+diff --git a/src/robot.cpp b/src/robot.cpp
+index cd29001..7843d7f 100644
+--- a/src/robot.cpp
++++ b/src/robot.cpp
+@@ -28,7 +28,7 @@
+ 
+ namespace fastsim
+ {
+-  void Robot :: move(float v1, float v2, const boost::shared_ptr<Map>& m, bool sticky_walls)
++  void Robot :: move(float v1, float v2, const std::shared_ptr<Map>& m, bool sticky_walls)
+   {
+     Posture prev = _pos;
+     _pos.move(v1, v2, _radius * 2);
+@@ -70,7 +70,7 @@ namespace fastsim
+     _bb.y = _pos.y() - _radius - 4;
+   }
+ 
+-  bool Robot :: _check_collision(const boost::shared_ptr<Map>& m)
++  bool Robot :: _check_collision(const std::shared_ptr<Map>& m)
+   {
+     // pixel wise
+     int rp = m->real_to_pixel(_radius);
+diff --git a/src/robot.hpp b/src/robot.hpp
+index ce812cf..eb62eaa 100644
+--- a/src/robot.hpp
++++ b/src/robot.hpp
+@@ -74,9 +74,9 @@ namespace fastsim
+     }
+ 
+     // v1, v2 - (double) velocites to be applied to motors
+-    // m - (boost::shared_ptr) pointer to map
++    // m - (std::shared_ptr) pointer to map
+     // sticky_walls - (boolean) whether we want sticky walls or not (the robot turns when in collision if this value is false)
+-    void move(float v1, float v2, const boost::shared_ptr<Map>& m, bool sticky_walls = true);
++    void move(float v1, float v2, const std::shared_ptr<Map>& m, bool sticky_walls = true);
+ 
+     const Posture& get_pos() const { return _pos; }
+     void set_pos(const Posture& pos) { _pos = pos; }
+@@ -115,7 +115,7 @@ namespace fastsim
+     const LinearCamera& get_camera() const { return _camera; }
+     bool use_camera() const { return _use_camera; }
+   protected:
+-    bool _check_collision(const boost::shared_ptr<Map>& m);
++    bool _check_collision(const std::shared_ptr<Map>& m);
+     void _update_bb();
+     float _radius;
+     Posture _pos;
+diff --git a/src/settings.cpp b/src/settings.cpp
+index 9488522..3017fce 100644
+--- a/src/settings.cpp
++++ b/src/settings.cpp
+@@ -7,12 +7,12 @@ namespace fastsim {
+     read_xml(config_file, pt);
+         
+     ptree &n_map = pt.get_child("fastsim.map");
+-    _map = boost::shared_ptr<Map>
++    _map = std::shared_ptr<Map>
+       (new Map(_get_a<std::string>(n_map, "name").c_str(),
+ 	       _get_a<float>(n_map, "size")));
+ 
+     ptree &n_robot = pt.get_child("fastsim.robot");
+-    _robot = boost::shared_ptr<Robot>
++    _robot = std::shared_ptr<Robot>
+       (new Robot(_get_a<float>(n_robot, "diameter"),
+ 		 Posture(_get_a<float>(n_robot, "x"),
+ 			 _get_a<float>(n_robot, "y"),
+diff --git a/src/settings.hpp b/src/settings.hpp
+index 8f70a07..2f91acf 100644
+--- a/src/settings.hpp
++++ b/src/settings.hpp
+@@ -12,12 +12,12 @@ namespace fastsim {
+   public:
+     // parse a xml file to instantiate the map & the robot
+     Settings(const std::string& xml_file);
+-    boost::shared_ptr<Map> map() { return _map; }
+-    boost::shared_ptr<Robot> robot() { return _robot; }
++    std::shared_ptr<Map> map() { return _map; }
++    std::shared_ptr<Robot> robot() { return _robot; }
+     bool display() const { return _display; }
+   protected:
+-    boost::shared_ptr<Map> _map;
+-    boost::shared_ptr<Robot> _robot;
++    std::shared_ptr<Map> _map;
++    std::shared_ptr<Robot> _robot;
+     bool _display;
+ 
+     template<typename R>
+diff --git a/wscript b/wscript
+index 650fc3f..b45518b 100755
+--- a/wscript
++++ b/wscript
+@@ -30,7 +30,7 @@ def configure(conf):
+     #            min_version='1.35')
+ 
+     # release
+-    opt_flags = common_flags + ' -O3 -msse2 -ggdb3 -g'
++    opt_flags = common_flags + ' -O3 -msse2 -fPIC'
+     conf.env['CXXFLAGS'] = cxxflags + opt_flags.split(' ')
+     print conf.env['CXXFLAGS']
+ 

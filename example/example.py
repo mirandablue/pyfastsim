@@ -29,7 +29,7 @@ d = Display(env_map, robot)
 for i in range(10000):
 	d.update()
 	pos = robot.get_pos()
-	print("Step %d robot pos: x = %f    y = %f    theta = %f" % (i, pos.x(), pos.y(), pos.theta()))	
+	print("Step %d robot pos: x = %f    y = %f    theta = %f" % (i, pos.x(), pos.y(), pos.theta()))
 	robot.move(1.0, 1.1, env_map)
 	time.sleep(0.001)
 

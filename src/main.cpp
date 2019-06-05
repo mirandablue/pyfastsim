@@ -10,16 +10,27 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(pyfastsim, m) {
 	m.doc() = R"pbdoc(
-		Pybind11 example plugin
-		-----------------------
+		Pybind11 libfastsim bindings
+		-----------------------------
 
-		.. currentmodule:: python_example
+		.. currentmodule:: pyfastsim
 
 		.. autosummary::
 		   :toctree: _generate
 
-		   add
-		   subtract
+		   Posture
+		   Goal
+		   IlluminatedSwitch
+		   Map
+		   Laser
+		   LaserScanner
+		   LinerCamera
+		   BoundingBox
+		   Robot
+		   Display
+		   Radar
+		   Settings
+		   LightSensor
 	)pbdoc";
 
 	// posture.hpp

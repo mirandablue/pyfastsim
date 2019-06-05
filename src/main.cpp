@@ -163,7 +163,7 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def_readwrite("w", &fastsim::Robot::BoundingBox::w)
 		.def_readwrite("h", &fastsim::Robot::BoundingBox::h);
 	
-	py::class_<fastsim::Robot>(m, "Robot")
+	py::class_<fastsim::Robot, std::shared_ptr<fastsim::Robot>>(m, "Robot")
 		.def(py::init<float>(), py::arg("radius"))
 		.def(py::init<float, const fastsim::Posture&>(), py::arg("radius"), py::arg("pos"))
 		.def("reinit", &fastsim::Robot::reinit)

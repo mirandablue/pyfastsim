@@ -51,20 +51,20 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def(py::self + py::self)
 		.def("move", &fastsim::Posture::move)
 		.def(py::pickle(
-        [](const fastsim::Posture &p) { // __getstate__
-            /* Return a tuple that fully encodes the state of the object */
-            return py::make_tuple(p.x(), p.y(), p.theta());
-        },
-        [](py::tuple t) { // __setstate__
-            if (t.size() != 3)
-                throw std::runtime_error("Posture unpickling: invalid state!");
+		[](const fastsim::Posture &p) { // __getstate__
+			/* Return a tuple that fully encodes the state of the object */
+			return py::make_tuple(p.x(), p.y(), p.theta());
+		},
+		[](py::tuple t) { // __setstate__
+			if (t.size() != 3)
+				throw std::runtime_error("Posture unpickling: invalid state!");
 
-            /* Create a new C++ instance */
-            fastsim::Posture p(t[0].cast<float>(), t[2].cast<float>(), t[2].cast<float>());
+			/* Create a new C++ instance */
+			fastsim::Posture p(t[0].cast<float>(), t[1].cast<float>(), t[2].cast<float>());
 
-            return p;
-        }
-    ))
+			return p;
+		}
+	))
 		// Template -- provide float and double versions
 		.def_static("normalize_angle", py::overload_cast<float>(&fastsim::Posture::normalize_angle<float>))
 		.def_static("normalize_angle", py::overload_cast<double>(&fastsim::Posture::normalize_angle<double>));
@@ -86,7 +86,22 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("get_x", &fastsim::Goal::get_x)
 		.def("get_y", &fastsim::Goal::get_y)
 		.def("get_diam", &fastsim::Goal::get_diam)
-		.def("get_color", &fastsim::Goal::get_color);
+		.def("get_color", &fastsim::Goal::get_color)
+		.def(py::pickle(
+		[](const fastsim::Goal &p) { // __getstate__
+			/* Return a tuple that fully encodes the state of the object */
+			return py::make_tuple(p.get_x(), p.get_y(), p.get_diam(), p.get_color());
+		},
+		[](py::tuple t) { // __setstate__
+			if (t.size() != 4)
+				throw std::runtime_error("Goal unpickling: invalid state!");
+
+			/* Create a new C++ instance */
+			fastsim::Goal p(t[0].cast<float>(), t[1].cast<float>(), t[2].cast<float>(), t[3].cast<int>());
+
+			return p;
+		}
+	));
 	
 	// illuminated_switch.hpp
 	py::class_<fastsim::IlluminatedSwitch, std::shared_ptr<fastsim::IlluminatedSwitch>>(m, "IlluminatedSwitch")
@@ -104,7 +119,22 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("get_y", &fastsim::IlluminatedSwitch::get_y)
 		.def("set_pos", &fastsim::IlluminatedSwitch::set_pos)
 		.def("get_activated", &fastsim::IlluminatedSwitch::get_activated)
-		.def("link", &fastsim::IlluminatedSwitch::link);
+		.def("link", &fastsim::IlluminatedSwitch::link)
+		.def(py::pickle(
+		[](const fastsim::IlluminatedSwitch &p) { // __getstate__
+			/* Return a tuple that fully encodes the state of the object */
+			return py::make_tuple(p.get_color(), p.get_radius(), p.get_x(), p.get_y(), p.get_on());
+		},
+		[](py::tuple t) { // __setstate__
+			if (t.size() != 5)
+				throw std::runtime_error("IlluminatedSwitch unpickling: invalid state!");
+
+			/* Create a new C++ instance */
+			fastsim::IlluminatedSwitch p(t[0].cast<int>(), t[1].cast<float>(), t[2].cast<float>(), t[3].cast<float>(), t[4].cast<bool>());
+
+			return p;
+		}
+	));
 	// ClosestSwitch_f not implemented
 	
 	// map.hpp

@@ -50,6 +50,21 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("rotate", &fastsim::Posture::rotate)
 		.def(py::self + py::self)
 		.def("move", &fastsim::Posture::move)
+		.def(py::pickle(
+        [](const fastsim::Posture &p) { // __getstate__
+            /* Return a tuple that fully encodes the state of the object */
+            return py::make_tuple(p.x(), p.y(), p.theta());
+        },
+        [](py::tuple t) { // __setstate__
+            if (t.size() != 3)
+                throw std::runtime_error("Posture unpickling: invalid state!");
+
+            /* Create a new C++ instance */
+            fastsim::Posture p(t[0].cast<float>(), t[2].cast<float>(), t[2].cast<float>());
+
+            return p;
+        }
+    ))
 		// Template -- provide float and double versions
 		.def_static("normalize_angle", py::overload_cast<float>(&fastsim::Posture::normalize_angle<float>))
 		.def_static("normalize_angle", py::overload_cast<double>(&fastsim::Posture::normalize_angle<double>));

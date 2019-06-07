@@ -225,7 +225,22 @@ py::bind_vector<std::vector<int>>(m, "VectorInt");
 		.def("get_x", &fastsim::Laser::get_x)
 		.def("get_y", &fastsim::Laser::get_y)
 		.def("get_x_pixel", &fastsim::Laser::get_x_pixel)
-		.def("get_y_pixel", &fastsim::Laser::get_y_pixel);
+		.def("get_y_pixel", &fastsim::Laser::get_y_pixel)
+		.def(py::pickle(
+		[](const fastsim::Laser &p) { // __getstate__
+			/* Return a tuple that fully encodes the state of the object */
+			return py::make_tuple(p.get_angle(), p.get_range(), p.get_gap_dist(), p.get_gap_angle());
+		},
+		[](py::tuple t) { // __setstate__
+			if (t.size() != 4)
+				throw std::runtime_error("Laser unpickling: invalid state!");
+
+			/* Create a new C++ instance */
+			fastsim::Laser p(t[0].cast<float>(), t[1].cast<float>(), t[2].cast<float>(), t[3].cast<float>());
+
+			return p;
+		}
+		));
 
 	// laser_scanner.hpp
 	py::class_<fastsim::LaserScanner>(m, "LaserScanner")
@@ -235,7 +250,22 @@ py::bind_vector<std::vector<int>>(m, "VectorInt");
 		.def("get_angle_max", &fastsim::LaserScanner::get_angle_max)
 		.def("get_angle_min", &fastsim::LaserScanner::get_angle_min)
 		.def("get_angle_increment", &fastsim::LaserScanner::get_angle_increment)
-		.def("get_lasers", &fastsim::LaserScanner::get_lasers);
+		.def("get_lasers", &fastsim::LaserScanner::get_lasers)
+		.def(py::pickle(
+		[](const fastsim::LaserScanner &p) { // __getstate__
+			/* Return a tuple that fully encodes the state of the object */
+			return py::make_tuple(p.get_angle_min(), p.get_angle_max(), p.get_angle_increment(), p.get_range_max());
+		},
+		[](py::tuple t) { // __setstate__
+			if (t.size() != 4)
+				throw std::runtime_error("Laser unpickling: invalid state!");
+
+			/* Create a new C++ instance */
+			fastsim::LaserScanner p(t[0].cast<float>(), t[1].cast<float>(), t[2].cast<float>(), t[3].cast<float>());
+
+			return p;
+		}
+		));
 
 	//linear_camera.hpp
 	py::class_<fastsim::LinearCamera>(m, "LinearCamera")
@@ -243,7 +273,22 @@ py::bind_vector<std::vector<int>>(m, "VectorInt");
 		.def(py::init<float,int>(), py::arg("angular_range"), py::arg("nb_pixels"))
 		.def("update", &fastsim::LinearCamera::update)
 		.def("pixels", &fastsim::LinearCamera::pixels)
-		.def("get_angular_range", &fastsim::LinearCamera::get_angular_range);
+		.def("get_angular_range", &fastsim::LinearCamera::get_angular_range)
+		.def(py::pickle(
+		[](const fastsim::LinearCamera &p) { // __getstate__
+			/* Return a tuple that fully encodes the state of the object */
+			return py::make_tuple(p.get_angular_range(), p.pixels().size());
+		},
+		[](py::tuple t) { // __setstate__
+			if (t.size() != 2)
+				throw std::runtime_error("Laser unpickling: invalid state!");
+
+			/* Create a new C++ instance */
+			fastsim::LinearCamera p(t[0].cast<float>(), t[1].cast<int>());
+
+			return p;
+		}
+		));
 
 	// robot.hpp
 	py::class_<fastsim::Robot::BoundingBox>(m, "BoundingBox")

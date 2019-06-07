@@ -5,8 +5,11 @@
 #include <pybind11/operators.h>
 #include <libfastsim/fastsim.hpp>
 #include <pybind11/stl.h> // Automatic conversion of std::vector
-
+#include <pybind11/stl_bind.h>
 namespace py = pybind11;
+
+
+
 
 PYBIND11_MODULE(pyfastsim, m) {
 	m.doc() = R"pbdoc(
@@ -32,6 +35,8 @@ PYBIND11_MODULE(pyfastsim, m) {
 		   Settings
 		   LightSensor
 	)pbdoc";
+
+py::bind_vector<std::vector<int>>(m, "VectorInt");
 
 	// posture.hpp
 	py::class_<fastsim::Posture>(m, "Posture")
@@ -101,7 +106,7 @@ PYBIND11_MODULE(pyfastsim, m) {
 
 			return p;
 		}
-	));
+		));
 	
 	// illuminated_switch.hpp
 	py::class_<fastsim::IlluminatedSwitch, std::shared_ptr<fastsim::IlluminatedSwitch>>(m, "IlluminatedSwitch")
@@ -134,13 +139,24 @@ PYBIND11_MODULE(pyfastsim, m) {
 
 			return p;
 		}
-	));
+		));
 	// ClosestSwitch_f not implemented
 	
 	// map.hpp
+
 	py::class_<fastsim::Map, std::shared_ptr<fastsim::Map>> map(m, "Map");
+	
+	py::enum_<fastsim::Map::status_t>(map, "status_t")
+		.value("free", fastsim::Map::status_t::free)
+		.value("obstacle", fastsim::Map::status_t::obstacle)
+		.export_values();
+	
+
 	map.def(py::init<const char*, float>(), py::arg("fname"), py::arg("real_w"))
 		.def(py::init<const fastsim::Map&>())
+		.def(py::init<int, int, float>())
+		.def("get_data", &fastsim::Map::get_data)
+		.def("set_data", &fastsim::Map::set_data)
 		.def("get_pixel", &fastsim::Map::get_pixel)
 		.def("set_pixel", &fastsim::Map::set_pixel)
 		.def("get_real", &fastsim::Map::get_real)
@@ -161,12 +177,40 @@ PYBIND11_MODULE(pyfastsim, m) {
 		.def("clear_illuminated_switches", &fastsim::Map::clear_illuminated_switches)
 		.def("update", &fastsim::Map::update)
 		.def("terrain_switch", &fastsim::Map::terrain_switch)
-		.def("draw_rect", &fastsim::Map::draw_rect);
-	
-	py::enum_<fastsim::Map::status_t>(map, "status_t")
-		.value("free", fastsim::Map::status_t::free)
-		.value("obstacle", fastsim::Map::status_t::obstacle)
-		.export_values();
+		.def("draw_rect", &fastsim::Map::draw_rect)
+		.def(py::pickle(
+		[](const fastsim::Map &p) { // __getstate__
+			/* Return a tuple that fully encodes the state of the object */
+			
+			return py::make_tuple(p.get_pixel_w(), p.get_pixel_h(), p.get_real_w(), p.get_data(), p.get_goals(), p.get_illuminated_switches());
+		},
+		[](py::tuple t) { // __setstate__
+			if (t.size() != 6)
+				throw std::runtime_error("Map unpickling: invalid state!");
+
+			/* Create a new C++ instance */
+			int w = t[0].cast<int>();
+			int h = t[1].cast<int>();
+			fastsim::Map p(w, h, t[2].cast<float>());
+			
+			// Set map data
+			p.set_data(t[3].cast<std::vector<fastsim::Map::status_t>>());
+			
+			// Goals
+			std::vector<fastsim::Goal> goals = t[4].cast<std::vector<fastsim::Goal>>();
+			for(fastsim::Goal& g : goals)
+				p.add_goal(g);
+			
+			// Switches
+			std::vector<fastsim::Map::ill_sw_t> switches = t[5].cast<std::vector<fastsim::Map::ill_sw_t>>();
+			for(fastsim::Map::ill_sw_t& is : switches)
+				p.add_illuminated_switch(is);
+			
+			return p;
+		}
+		));
+		
+
 
 	
 	// laser.hpp

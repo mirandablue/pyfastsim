@@ -241,7 +241,7 @@ index ecac08c..63e7ee0 100644
        Robot r(20.0f, Posture(200, 200, 0));
        r.add_laser(Laser(M_PI / 4.0, 100.0f));
 diff --git a/src/map.hpp b/src/map.hpp
-index 36b52f6..0e6cca8 100644
+index 36b52f6..f7b20c4 100644
 --- a/src/map.hpp
 +++ b/src/map.hpp
 @@ -27,7 +27,8 @@
@@ -254,7 +254,35 @@ index 36b52f6..0e6cca8 100644
  #include <iostream>
  
  #include "misc.hpp"
-@@ -121,7 +122,7 @@ namespace fastsim
+@@ -58,6 +59,27 @@ namespace fastsim
+       assert(_w == _h);
+       _fx = _w / _real_w;
+     }
++    
++    Map(int pixel_w, int pixel_h, float real_w) : 
++      _w(pixel_w),
++      _h(pixel_h),
++      _real_w(real_w),
++      _real_h(real_w)
++    {
++      _data.resize(_w * _h);
++      _fx = _w / _real_w;
++      //std::fill(_data.begin(), _data.end(), free);
++    }
++    
++    const std::vector<status_t>& get_data() const {
++      return _data;
++    }
++    
++    void set_data(const std::vector<status_t>& from) {
++      assert(from.size() == _w*_h);
++      _data = from;
++    }
++    
+     // copy ONLY the picture (no goal, illuminated switches, etc) 
+     // REASON:
+     // we want to avoid reading the data data but we don't want to
+@@ -121,7 +143,7 @@ namespace fastsim
      const std::vector<Goal>& get_goals() const { return _goals; }
      void add_goal(const Goal& g) { _goals.push_back(g); }
  

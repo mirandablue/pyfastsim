@@ -95,9 +95,9 @@ class BuildExt(build_ext):
         elif ct == 'msvc':
             opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
 # Disabled -- SDL does not work now
-#        if(get_SDL()):
-#            opts.append("-DUSE_SDL")
-#            extra_libs.append("SDL")
+        if(get_SDL()):
+            opts.append("-DUSE_SDL")
+            extra_libs.append("SDL")
         for ext in self.extensions:
             ext.extra_compile_args = opts
             ext.libraries += extra_libs

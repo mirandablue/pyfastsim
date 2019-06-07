@@ -325,7 +325,8 @@ py::bind_vector<std::vector<int>>(m, "VectorInt");
 		.def("use_camera", py::overload_cast<>(&fastsim::Robot::use_camera))
 		.def("use_camera", py::overload_cast<const fastsim::LinearCamera&>(&fastsim::Robot::use_camera))
 		.def("get_camera", &fastsim::Robot::get_camera)
-		.def("use_camera", py::overload_cast<>(&fastsim::Robot::use_camera, py::const_))
+		.def("camera_enabled", &fastsim::Robot::camera_enabled)
+		//.def("use_camera", py::overload_cast<>(&fastsim::Robot::use_camera, py::const_))
 		.def(py::pickle(
 		[](const fastsim::Robot &p) { // __getstate__
 			/* Return a tuple that fully encodes the state of the object */
@@ -336,7 +337,7 @@ py::bind_vector<std::vector<int>>(m, "VectorInt");
 						p.get_light_sensors(),
 						p.get_laser_scanners(),
 						p.get_camera(),
-						p.use_camera(),
+						p.camera_enabled(),
 						p.color());
 		},
 		[](py::tuple t) { // __setstate__
@@ -380,9 +381,15 @@ py::bind_vector<std::vector<int>>(m, "VectorInt");
 
 	// display.hpp
 	py::class_<fastsim::Display>(m, "Display")
-		.def(py::init<std::shared_ptr<fastsim::Map>, const fastsim::Robot&>())
+		//.def(py::init<std::shared_ptr<fastsim::Map>, const fastsim::Robot&>())
+		.def(py::init<std::shared_ptr<fastsim::Map>, std::shared_ptr<fastsim::Robot>>())
 		.def("update", &fastsim::Display::update)
 		.def("update_map", &fastsim::Display::update_map);
+/*		.def("__init__",
+			[](fastsim::Display& instance, std::shared_ptr<fastsim::Map> m, std::shared_ptr<fastsim::Robot> r) {
+			new (&instance) fastsim::Display(m, *r);
+		}
+		);*/
 		// Not picklable
 
 

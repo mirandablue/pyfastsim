@@ -321,16 +321,69 @@ py::bind_vector<std::vector<int>>(m, "VectorInt");
 		.def("add_light_sensor", &fastsim::Robot::add_light_sensor)
 		.def("get_light_sensors", &fastsim::Robot::get_light_sensors)
 		.def("set_color", &fastsim::Robot::set_color)
+		.def("color", &fastsim::Robot::color)
 		.def("use_camera", py::overload_cast<>(&fastsim::Robot::use_camera))
 		.def("use_camera", py::overload_cast<const fastsim::LinearCamera&>(&fastsim::Robot::use_camera))
 		.def("get_camera", &fastsim::Robot::get_camera)
-		.def("use_camera", py::overload_cast<>(&fastsim::Robot::use_camera, py::const_));
+		.def("use_camera", py::overload_cast<>(&fastsim::Robot::use_camera, py::const_))
+		.def(py::pickle(
+		[](const fastsim::Robot &p) { // __getstate__
+			/* Return a tuple that fully encodes the state of the object */
+			return py::make_tuple(p.get_radius(),
+						p.get_pos(),
+						p.get_lasers(),
+						p.get_radars(),
+						p.get_light_sensors(),
+						p.get_laser_scanners(),
+						p.get_camera(),
+						p.use_camera(),
+						p.color());
+		},
+		[](py::tuple t) { // __setstate__
+			if (t.size() != 9)
+				throw std::runtime_error("Robot unpickling: invalid state!");
+
+			/* Create a new robot with radius and posture */
+			
+			fastsim::Robot p(t[0].cast<float>(), t[1].cast<fastsim::Posture>());
+			
+			// lasers
+			std::vector<fastsim::Laser> lasers = t[2].cast<std::vector<fastsim::Laser>>();
+			for(fastsim::Laser& l : lasers)
+				p.add_laser(l);
+			
+			// radars
+			std::vector<fastsim::Radar> radars = t[3].cast<std::vector<fastsim::Radar>>();
+			for(fastsim::Radar& r : radars)
+				p.add_radar(r);
+
+			// light sensors
+			std::vector<fastsim::LightSensor> lightsensors = t[4].cast<std::vector<fastsim::LightSensor>>();
+			for(fastsim::LightSensor& ls : lightsensors)
+				p.add_light_sensor(ls);
+
+			// laser scanners
+			std::vector<fastsim::LaserScanner> scanners = t[5].cast<std::vector<fastsim::LaserScanner>>();
+			for(fastsim::LaserScanner& sc : scanners)
+				p.add_laser_scanner(sc);
+
+			// Linear camera
+			if(t[7].cast<bool>()) // Only if use_camera was toggles
+				p.use_camera(t[6].cast<fastsim::LinearCamera>());
+			
+			// Set color
+			p.set_color(t[8].cast<unsigned int>());
+
+			return p;
+		}
+		));
 
 	// display.hpp
 	py::class_<fastsim::Display>(m, "Display")
 		.def(py::init<std::shared_ptr<fastsim::Map>, const fastsim::Robot&>())
 		.def("update", &fastsim::Display::update)
 		.def("update_map", &fastsim::Display::update_map);
+		// Not picklable
 
 
 	// radar.hpp
@@ -340,7 +393,22 @@ py::bind_vector<std::vector<int>>(m, "VectorInt");
 		.def("get_activated_slice", &fastsim::Radar::get_activated_slice)
 		.def("get_nb_slices", &fastsim::Radar::get_nb_slices)
 		.def("get_color", &fastsim::Radar::get_color)
-		.def("get_inc", &fastsim::Radar::get_inc);
+		.def("get_inc", &fastsim::Radar::get_inc)
+		.def(py::pickle(
+		[](const fastsim::Radar &p) { // __getstate__
+			/* Return a tuple that fully encodes the state of the object */
+			return py::make_tuple(p.get_color(), p.get_nb_slices());
+		},
+		[](py::tuple t) { // __setstate__ 
+			if (t.size() != 2)
+				throw std::runtime_error("Laser unpickling: invalid state!");
+			/* Create a new C++ instance */
+			fastsim::Radar p(t[0].cast<int>(), t[1].cast<int>());
+			
+			// NOTE: through_walls will always be true
+			return p;
+		}
+		));
 	
 	// settings.hpp
 	py::class_<fastsim::Settings>(m, "Settings")
@@ -348,6 +416,7 @@ py::bind_vector<std::vector<int>>(m, "VectorInt");
 		.def("map", &fastsim::Settings::map)
 		.def("robot", &fastsim::Settings::robot)
 		.def("display", &fastsim::Settings::display);
+		// Not picklable
 
 	// light_sensor.hpp
 	py::class_<fastsim::LightSensor>(m, "LightSensor")
@@ -358,7 +427,21 @@ py::bind_vector<std::vector<int>>(m, "VectorInt");
 		.def("get_range", &fastsim::LightSensor::get_range)
 		.def("get_activated", &fastsim::LightSensor::get_activated)
 		.def("get_num", &fastsim::LightSensor::get_num)
-		.def("get_distance", &fastsim::LightSensor::get_distance);
+		.def("get_distance", &fastsim::LightSensor::get_distance)
+		.def(py::pickle(
+		[](const fastsim::LightSensor &p) { // __getstate__
+			/* Return a tuple that fully encodes the state of the object */
+			return py::make_tuple(p.get_color(), p.get_angle(), p.get_range());
+		},
+		[](py::tuple t) { // __setstate__ 
+			if (t.size() != 3)
+				throw std::runtime_error("Laser unpickling: invalid state!");
+			/* Create a new C++ instance */
+			fastsim::LightSensor p(t[0].cast<int>(), t[1].cast<float>(), t[2].cast<float>());
+			
+			return p;
+		}
+		));
 
 
 #ifdef VERSION_INFO

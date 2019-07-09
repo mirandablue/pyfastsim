@@ -3,8 +3,6 @@ pyFastsim
 
 Python bindings for [libfastsim](https://github.com/jbmouret/libfastsim).
 
-SDL DOES NOT WORK FOR NOW
-
 
 Requirements
 ------------

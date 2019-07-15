@@ -67,7 +67,7 @@ def cpp_flag(compiler):
 
 
 def get_SDL():
-    if(os.system("sdl-config --cflags") == 0):
+    if(os.system("which sdl-config && sdl-config --cflags") == 0):
         return True
     else:
         return False
@@ -79,7 +79,8 @@ class BuildExt(build_ext):
         'msvc': ['/EHsc'],
         'unix': [],
     }
-
+    
+    
     if sys.platform == 'darwin':
         c_opts['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
 
@@ -100,6 +101,7 @@ class BuildExt(build_ext):
             extra_libs.append("SDL")
         for ext in self.extensions:
             ext.extra_compile_args = opts
+            ext.extra_link_args = opts
             ext.libraries += extra_libs
         build_ext.build_extensions(self)
 
